@@ -70,6 +70,8 @@ namespace test
 		}
 	};
 
+	const auto multiply_action_object = multiply_action_class{};
+
 	class divide_action_class : public action_class
 	{
 	public:
@@ -80,6 +82,8 @@ namespace test
 			return data1 / data2;
 		}
 	};
+	
+	const auto divide_action_object = divide_action_class{};
 
 	constexpr auto multiply_variant = [](data_type data1, data_type data2)
 	{
@@ -185,9 +189,6 @@ namespace test
 		else if(chosen_test_type == test_type::polymorphic_objects)
 		{
 			std::cout << "Testing for polymorphic objects...\n";
-
-			const auto multiply_action_object = multiply_action_class{};
-			const auto divide_action_object = divide_action_class{};
 
 			auto actions = std::vector<const action_class*>(num_data);
 
