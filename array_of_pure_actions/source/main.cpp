@@ -115,7 +115,7 @@ namespace test
 
 		auto data_generator = generator(1, 10'000);
 
-		std::cout << "Array of actions test\n";
+		std::cout << "Array of pure actions test\n";
 
 		// const auto chosen_test_type = test_type::std_variant;
 		// const auto num_data = 100'000u;
