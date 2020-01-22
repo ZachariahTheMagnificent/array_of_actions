@@ -26,7 +26,6 @@ enum class test_type
 	function_pointers,
 	polymorphic_objects,
 	std_function,
-	std_function_containing_lambdas,
 	std_variant
 };
 
@@ -65,7 +64,7 @@ public:
 
 	data_type operator()(data_type data1, data_type data2) const override
 	{
-		return multiply(data1, data2);
+		return data1 * data2;
 	}
 };
 
@@ -76,23 +75,23 @@ public:
 
 	data_type operator()(data_type data1, data_type data2) const override
 	{
-		return divide(data1, data2);
+		return data1 / data2;
 	}
 };
 
-constexpr auto multiply_lambda = [](data_type data1, data_type data2)
+constexpr auto multiply_variant = [](data_type data1, data_type data2)
 {
-	return multiply(data1, data2);
+	return data1 * data2;
 };
 
-constexpr auto divide_lambda = [](data_type data1, data_type data2)
+constexpr auto divide_variant = [](data_type data1, data_type data2)
 {
-	return divide(data1, data2);
+	return data1 / data2;
 };
 
 using std_action_function = std::function<action_function>;
 
-using action_variant = std::variant<decltype(multiply_lambda), decltype(divide_lambda)>;
+using action_variant = std::variant<decltype(multiply_variant), decltype(divide_variant)>;
 
 void test(int num_arguments, char *arguments[])
 {
@@ -148,11 +147,11 @@ void test(int num_arguments, char *arguments[])
 		{
 			if(actions[index] == action::multiply)
 			{
-				results[index] = multiply(data1_array[index], data2_array[index]);
+				results[index] = data1_array[index] * data2_array[index];
 			}
 			else if(actions[index] == action::divide)
 			{
-				results[index] = divide(data1_array[index], data2_array[index]);
+				results[index] = data1_array[index] / data2_array[index];
 			}
 			else
 			{
@@ -210,27 +209,13 @@ void test(int num_arguments, char *arguments[])
 
 		auto actions = std::vector<std_action_function>(num_data);
 
-		auto choices = std::array{std_action_function{divide}, std_action_function{multiply}};
-
-		std::generate(actions.begin(), actions.end(), [choices, action_generator = generator(std::size_t{}, std::size(choices) - 1)]() mutable
+		auto choices = std::array{std_action_function{[](auto data1, auto data2)
 		{
-			return choices[action_generator()];
-		});
-		
-		start = std::chrono::steady_clock::now();
-		for(auto index = std::size_t{}, size = data1_array.size(); index < size; ++index)
+			return data1 / data2;
+		}}, std_action_function{[](auto data1, auto data2)
 		{
-			results[index] = actions[index](data1_array[index], data2_array[index]);
-		}
-		end = std::chrono::steady_clock::now();
-	}
-	else if(chosen_test_type == test_type::std_function_containing_lambdas)
-	{
-		std::cout << "Testing for standard functions containing lambdas...\n";
-
-		auto actions = std::vector<std_action_function>(num_data);
-
-		auto choices = std::array{std_action_function{divide_lambda}, std_action_function{multiply_lambda}};
+			return data1 * data2;
+		}}};
 
 		std::generate(actions.begin(), actions.end(), [choices, action_generator = generator(std::size_t{}, std::size(choices) - 1)]() mutable
 		{
@@ -250,7 +235,7 @@ void test(int num_arguments, char *arguments[])
 
 		auto actions = std::vector<action_variant>{};
 
-		auto choices = std::array{action_variant{divide_lambda}, action_variant{multiply_lambda}};
+		auto choices = std::array{action_variant{divide_variant}, action_variant{multiply_variant}};
 
 		std::generate_n(std::back_inserter(actions), num_data, [choices, action_generator = generator(std::size_t{}, std::size(choices) - 1)]() mutable
 		{
